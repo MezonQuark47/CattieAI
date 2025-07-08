@@ -11,5 +11,9 @@
       "src": "/(.*)",
       "dest": "/"
     }
-  ]
+  ],
+  "env": {
+    "NEXT_PRIVATE_CACHE": "false"
+  },
+  "buildCommand": "npm run build"
 } 
