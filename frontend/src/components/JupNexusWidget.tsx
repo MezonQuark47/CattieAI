@@ -39,7 +39,8 @@ export default function JupNexusWidget() {
     setIsLoadingSuggestions(true);
     
     try {
-      const response = await fetch('http://localhost:3001/api/ai-suggestions', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/ai-suggestions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,10 +52,25 @@ export default function JupNexusWidget() {
         }),
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setSuggestions(data.suggestions);
     } catch (error) {
       console.error('Failed to fetch AI suggestions:', error);
+      // Fallback mock suggestions for demo
+      setSuggestions([
+        {
+          icon: '🎯',
+          title: 'Demo Suggestion',
+          description: 'Backend connection failed. This is a demo suggestion.',
+          type: 'primary',
+          url: '/swap',
+          priority: 1
+        }
+      ]);
     } finally {
       setIsLoadingSuggestions(false);
     }
