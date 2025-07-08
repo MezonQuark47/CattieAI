@@ -1,14 +1,15 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import JupNexusWidget from '../../components/JupNexusWidget';
 import { WalletButton } from '../../components/WalletButton';
 import { useJupNexusStore } from '../../store/jupnexus';
 import Toast from '../../components/Toast';
 
-export default function ProPage() {
+// Separate component for search params logic
+function ProPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { trackActivity } = useJupNexusStore();
@@ -202,48 +203,47 @@ export default function ProPage() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-white font-medium">{token.symbol}</div>
-                        <div className="text-gray-400 text-sm">{token.name}</div>
+                        <div className="font-medium text-white">{token.symbol}</div>
+                        <div className="text-sm text-gray-400">{token.name}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-medium">{token.price}</div>
-                      <div className={`text-sm ${token.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className="font-medium text-white">{token.price}</div>
+                      <div className={`text-sm ${token.change.startsWith('+') ? 'text-green-400' : token.change.startsWith('-') ? 'text-red-400' : 'text-gray-400'}`}>
                         {token.change}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-gray-300 text-sm">Vol: {token.volume}</div>
-                      <div className="text-gray-400 text-xs">Liq: {token.liquidity}</div>
+                      <div className="text-sm text-gray-400">Vol: {token.volume}</div>
+                      <div className="text-sm text-gray-400">Liq: {token.liquidity}</div>
                     </div>
-                    <button
-                      onClick={() => simulateTokenAnalysis(token.symbol)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                    >
-                      🔍 Analyze
-                    </button>
+                    <div>
+                      <button
+                        onClick={() => simulateTokenAnalysis(token.symbol)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                      >
+                        🔍 Analyze
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Instructions */}
-          <div className="mt-8 bg-gray-700 rounded-lg p-4">
-            <h3 className="text-lg font-bold mb-2 text-purple-400">📋 Jupiter Pro Integration</h3>
-            <ul className="text-gray-300 text-sm space-y-1">
-              <li>• 🔥 <strong>Pro Tabs Detection</strong> - JupNexus recognizes different Pro sections</li>
+          {/* Demo Instructions */}
+          <div className="mt-8 bg-purple-600/20 border border-purple-600 rounded-lg p-4">
+            <h3 className="text-purple-200 font-bold mb-2">🎯 Demo Instructions</h3>
+            <ul className="text-purple-200 text-sm space-y-1">
+              <li>• 🔥 <strong>Tab Navigation</strong> - Switch between different Pro categories</li>
               <li>• 📊 <strong>Token Analysis</strong> - Click &quot;Analyze&quot; to trigger smart suggestions</li>
-              <li>• 🔄 <strong>Cross-Module Suggestions</strong> - Get recommendations for Swap, Trigger, DCA</li>
-              <li>• 📈 Try different tabs to see contextual welcome messages</li>
+              <li>• 🤖 <strong>AI Integration</strong> - JupNexus widget provides contextual recommendations</li>
+              <li>• 💡 <strong>Real Integration</strong> - In production, this would connect to Jupiter Pro APIs</li>
               <li>• 🎯 Click &quot;Analyze&quot; on any token to see AI suggestions!</li>
             </ul>
           </div>
         </div>
       </main>
-
-      {/* JupNexus Widget */}
-      <JupNexusWidget />
 
       {/* Toast Notifications */}
       {toast && (
@@ -253,6 +253,52 @@ export default function ProPage() {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* Cattie AI Widget */}
+      <JupNexusWidget />
     </div>
+  );
+}
+
+// Loading component for Suspense fallback
+function ProPageLoading() {
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      <header className="bg-gray-800 border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-pulse"></div>
+              <div className="h-6 bg-gray-600 rounded w-32 animate-pulse"></div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="h-8 bg-gray-600 rounded w-24 animate-pulse"></div>
+              <div className="h-8 bg-gray-600 rounded w-16 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="h-8 bg-gray-600 rounded w-64 animate-pulse mb-4"></div>
+          <div className="h-4 bg-gray-600 rounded w-96 animate-pulse mb-6"></div>
+          <div className="flex gap-2 mb-6">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="h-10 bg-gray-600 rounded w-24 animate-pulse"></div>
+            ))}
+          </div>
+          <div className="h-64 bg-gray-600 rounded animate-pulse"></div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function ProPage() {
+  return (
+    <Suspense fallback={<ProPageLoading />}>
+      <ProPageContent />
+    </Suspense>
   );
 } 
