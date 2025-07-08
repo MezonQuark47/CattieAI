@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+export default function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -25,5 +25,9 @@ module.exports = (req, res) => {
     timestamp: new Date().toISOString()
   });
   
-  res.json({ success: true });
-}; 
+  res.status(200).json({ 
+    success: true, 
+    message: 'Activity tracked successfully',
+    timestamp: new Date().toISOString()
+  });
+} 
