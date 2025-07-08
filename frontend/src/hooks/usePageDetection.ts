@@ -12,14 +12,19 @@ export const usePageDetection = () => {
       const url = window.location.href;
 
       try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
         // Backend'e sayfa bilgisi gönder
-        const response = await fetch('http://localhost:3001/api/detect-page', {
+        const response = await fetch(`${backendUrl}/api/detect-page`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ url, path }),
         });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
         
