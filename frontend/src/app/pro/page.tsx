@@ -8,18 +8,29 @@ import { WalletButton } from '../../components/WalletButton';
 import { useJupNexusStore } from '../../store/jupnexus';
 import Toast from '../../components/Toast';
 
-// Separate component for search params logic
+// Component that uses useSearchParams - wrapped in its own Suspense
+function SearchParamsHandler({ onTabChange }: { onTabChange: (tab: string) => void }) {
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'popular';
+    onTabChange(tab);
+  }, [searchParams, onTabChange]);
+  
+  return null;
+}
+
+// Loading component for SearchParams
+function SearchParamsLoading() {
+  return <div className="hidden">Loading search params...</div>;
+}
+
+// Separate component for main content
 function ProPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { trackActivity } = useJupNexusStore();
   const [activeTab, setActiveTab] = useState('popular');
   const [toast, setToast] = useState<{message: string, type: 'success' | 'info' | 'warning' | 'error'} | null>(null);
-
-  useEffect(() => {
-    const tab = searchParams.get('tab') || 'popular';
-    setActiveTab(tab);
-  }, [searchParams]);
 
   const tabs = [
     { id: 'cooking', label: 'Cooking', icon: '🔥', description: 'Trending tokens with high momentum' },
@@ -34,6 +45,7 @@ function ProPageContent() {
   const currentTab = tabs.find(tab => tab.id === activeTab) || tabs[6];
 
   const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
     router.push(`/pro?tab=${tabId}`);
   };
 
@@ -108,6 +120,11 @@ function ProPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      {/* Search params handler with its own Suspense boundary */}
+      <Suspense fallback={<SearchParamsLoading />}>
+        <SearchParamsHandler onTabChange={setActiveTab} />
+      </Suspense>
+
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
