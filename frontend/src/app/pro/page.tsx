@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import JupNexusWidget from '../../components/JupNexusWidget';
@@ -8,29 +8,24 @@ import { WalletButton } from '../../components/WalletButton';
 import { useJupNexusStore } from '../../store/jupnexus';
 import Toast from '../../components/Toast';
 
-// Component that uses useSearchParams - wrapped in its own Suspense
-function SearchParamsHandler({ onTabChange }: { onTabChange: (tab: string) => void }) {
-  const searchParams = useSearchParams();
-  
-  useEffect(() => {
-    const tab = searchParams.get('tab') || 'popular';
-    onTabChange(tab);
-  }, [searchParams, onTabChange]);
-  
-  return null;
-}
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic';
 
-// Loading component for SearchParams
-function SearchParamsLoading() {
-  return <div className="hidden">Loading search params...</div>;
-}
-
-// Separate component for main content
+// Main component content
 function ProPageContent() {
   const router = useRouter();
   const { trackActivity } = useJupNexusStore();
   const [activeTab, setActiveTab] = useState('popular');
   const [toast, setToast] = useState<{message: string, type: 'success' | 'info' | 'warning' | 'error'} | null>(null);
+
+  // Get tab from URL on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab') || 'popular';
+      setActiveTab(tab);
+    }
+  }, []);
 
   const tabs = [
     { id: 'cooking', label: 'Cooking', icon: '🔥', description: 'Trending tokens with high momentum' },
@@ -69,7 +64,7 @@ function ProPageContent() {
     });
   };
 
-  // Mock token data based on the screenshot
+  // Mock token data
   const mockTokens = [
     { 
       symbol: 'SOL', 
@@ -120,11 +115,6 @@ function ProPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Search params handler with its own Suspense boundary */}
-      <Suspense fallback={<SearchParamsLoading />}>
-        <SearchParamsHandler onTabChange={setActiveTab} />
-      </Suspense>
-
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
