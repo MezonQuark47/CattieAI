@@ -39,7 +39,16 @@ export default function JupNexusWidget() {
     setIsLoadingSuggestions(true);
     
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      // Environment variable kontrolü
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      
+      if (!backendUrl) {
+        console.warn('NEXT_PUBLIC_BACKEND_URL environment variable is not set, using fallback');
+        throw new Error('Backend URL not configured');
+      }
+
+      console.log('Fetching suggestions from backend:', backendUrl);
+      
       const response = await fetch(`${backendUrl}/api/ai-suggestions`, {
         method: 'POST',
         headers: {
@@ -57,6 +66,7 @@ export default function JupNexusWidget() {
       }
       
       const data = await response.json();
+      console.log('Suggestions response:', data);
       setSuggestions(data.suggestions);
     } catch (error) {
       console.error('Failed to fetch AI suggestions:', error);

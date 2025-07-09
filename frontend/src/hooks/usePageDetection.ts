@@ -12,7 +12,16 @@ export const usePageDetection = () => {
       const url = window.location.href;
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+        // Environment variable kontrolü
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        
+        if (!backendUrl) {
+          console.warn('NEXT_PUBLIC_BACKEND_URL environment variable is not set, using fallback');
+          throw new Error('Backend URL not configured');
+        }
+
+        console.log('Trying to connect to backend:', backendUrl);
+        
         // Backend'e sayfa bilgisi gönder
         const response = await fetch(`${backendUrl}/api/detect-page`, {
           method: 'POST',
@@ -27,6 +36,8 @@ export const usePageDetection = () => {
         }
 
         const data = await response.json();
+        
+        console.log('Backend response:', data);
         
         setCurrentPage(data.pageType);
         setWelcomeMessage(data.welcomeMessage);
@@ -61,6 +72,8 @@ export const usePageDetection = () => {
           pageType = `pro_${tab}`;
           welcomeMessage = `You're on Jupiter Pro - ${tab} section. Advanced trading tools and analytics.`;
         }
+        
+        console.log('Using fallback detection:', { pageType, welcomeMessage });
         
         setCurrentPage(pageType);
         setWelcomeMessage(welcomeMessage);
