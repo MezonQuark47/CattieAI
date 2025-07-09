@@ -69,7 +69,8 @@ export const useJupNexusStore = create<JupNexusState>((set, get) => ({
     const { walletAddress, currentPage } = get();
     
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const rawBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const backendUrl = rawBackendUrl.endsWith('/') ? rawBackendUrl.slice(0, -1) : rawBackendUrl;
       // Backend'e aktivite gönder
       await fetch(`${backendUrl}/api/track-activity`, {
         method: 'POST',

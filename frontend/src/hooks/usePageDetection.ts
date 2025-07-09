@@ -13,10 +13,8 @@ export const usePageDetection = () => {
 
       try {
         // Environment variable kontrolü - debugging için daha esnek
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://cattie-ai-6ecj.vercel.app';
-        
-        console.log('Environment variable NEXT_PUBLIC_BACKEND_URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
-        console.log('Using backend URL:', backendUrl);
+        const rawBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://cattie-ai-6ecj.vercel.app';
+        const backendUrl = rawBackendUrl.endsWith('/') ? rawBackendUrl.slice(0, -1) : rawBackendUrl;
         
         // Backend'e sayfa bilgisi gönder
         const response = await fetch(`${backendUrl}/api/detect-page`, {
