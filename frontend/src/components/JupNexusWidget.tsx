@@ -39,14 +39,10 @@ export default function JupNexusWidget() {
     setIsLoadingSuggestions(true);
     
     try {
-      // Environment variable kontrolü
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      // Environment variable kontrolü - debugging için daha esnek
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://cattie-ai-6ecj.vercel.app';
       
-      if (!backendUrl) {
-        console.warn('NEXT_PUBLIC_BACKEND_URL environment variable is not set, using fallback');
-        throw new Error('Backend URL not configured');
-      }
-
+      console.log('Environment variable NEXT_PUBLIC_BACKEND_URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
       console.log('Fetching suggestions from backend:', backendUrl);
       
       const response = await fetch(`${backendUrl}/api/ai-suggestions`, {
